@@ -10,6 +10,7 @@ import time
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):
         self.logger = get_logger(f"Worker-{worker_id}", "Worker")
+        self.totalWordsLogger = get_logger("TotalWord") # Create a log file for the info you are tracking
         self.config = config
         self.frontier = frontier
         # basic check for requests in scraper
@@ -28,6 +29,12 @@ class Worker(Thread):
                 f"Downloaded {tbd_url}, status <{resp.status}>, "
                 f"using cache {self.config.cache_server}.")
             scraped_urls = scraper.scraper(tbd_url, resp)
+
+            # Get informatio about total words in a page
+            totalWords = scraper.amountWords(tbd_url, resp)
+            self.totalWordsLogger.info(f"Total Word: {totalWords} in {tbd_url}")
+
+
             for scraped_url in scraped_urls:
                 self.frontier.add_url(scraped_url)
             self.frontier.mark_url_complete(tbd_url)

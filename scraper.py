@@ -1,9 +1,22 @@
 import re
 from urllib.parse import urlparse, urljoin
+from bs4 import BeautifulSoup
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
+
+def amountWords(url, resp):
+    if resp.status == 200:
+        contents = resp.raw_response.content.decode('utf-8')
+        # print(contents)
+
+        words = contents.split()
+        totalWords = len(words)
+
+        return totalWords
+
+    
 
 def extract_next_links(url, resp):
     # Implementation required.
@@ -15,13 +28,14 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
+
+    #
     links = []
     if resp.status == 200:
         contents = resp.raw_response.content.decode('utf-8')
         link_pattern = re.compile(r'href=["\'](.*?)["\']')
         links = link_pattern.findall(contents)
         links = [urljoin(resp.url, link) for link in links]
-
     return links
 
 def is_valid(url):
